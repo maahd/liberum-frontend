@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Liberum</title>
+<meta name="viewport" content="user-scalable=no, width=device-width" />
+<!-- CSS -->
+<!--
+<link rel="stylesheet" type="text/css" href="css/jquery.mobile.structure-1.3.0.min.css"/> 
+-->
+<link rel="stylesheet" type="text/css" href="css/jquery.mobile.custom.structure.css"/>
+<link rel="stylesheet" type="text/css" href="css/jquery.mobile.custom.structure.min.css"/>
+<link rel="stylesheet" type="text/css" href="css/jquery.mobile.custom.theme.css"/>
+<link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.2.min.css"/>
+<link rel="stylesheet" type="text/css" href="css/index.css"/>
+<!-- CSS -->
+<!-- FONT -->
+<link href='http://fonts.googleapis.com/css?family=Exo' rel='stylesheet' type='text/css'>
+<!-- FONT -->
+<!-- JAVASCRIPT -->
+<script src="js/index.js"></script>
+<script src="js/jquery.mobile.custom.js"></script>
+<script src="js/jquery.mobile.custom.min.js"></script>
+<script src="js/jquery-1.9.1.min.js"></script>
+<script src="js/jquery.mobile-1.4.2.min.js"></script>
+<script src="js/Camera.js"></script>
+<script src="js/CameraConstants.js"></script>
+<script src="js/CameraPopoverHandle.js"></script>
+<script src="js/CameraPopoverOptions.js"></script>
+<script type="text/javascript" charset="utf-8" src="js/phonegap.js"></script>
+<script src="js/index.js"></script>
+<script src="js/index2.js"></script>
+<!-- JAVASCRIPT -->
+
+<script type="text/javascript" charset="utf-8">
+
+    var pictureSource;   // picture source
+    var destinationType; // sets the format of returned value 
+ 
+    // Wait for PhoneGap to connect with the device
+    //
+    document.addEventListener("deviceready",onDeviceReady,false);
+ 
+    // PhoneGap is ready to be used!
+    //
+    function onDeviceReady() {
+        pictureSource=navigator.camera.PictureSourceType;
+        destinationType=navigator.camera.DestinationType;
+    }
+ 
+    // Called when a photo is successfully retrieved
+    //
+    function onPhotoDataSuccess(imageData) {
+      // Get image handle
+      //
+      var smallImage = document.getElementById('smallImage');
+ 
+      // Unhide image elements
+      //
+      smallImage.style.display = 'block';
+ 
+      // Show the captured photo
+      // The inline CSS rules are used to resize the image
+      //
+      smallImage.src = "data:image/jpeg;base64," + imageData;
+    }
+    
+  // Called when a photo is successfully retrieved
+    //
+    function onPhotoFileSuccess(imageData) {
+      // Get image handle
+      console.log(JSON.stringify(imageData));
+      
+      // Get image handle
+      //
+      var smallImage = document.getElementById('smallImage');
+ 
+      // Unhide image elements
+      //
+      smallImage.style.display = 'block';
+ 
+      // Show the captured photo
+      // The inline CSS rules are used to resize the image
+      //
+      smallImage.src = imageData;
+      image = imageData;
+    }
+ 
+    // Called when a photo is successfully retrieved
+    //
+    function onPhotoURISuccess(imageURI) {
+      // Uncomment to view the image file URI 
+      // console.log(imageURI);
+ 
+      // Get image handle
+      //
+      var largeImage = document.getElementById('largeImage');
+ 
+      // Unhide image elements
+      //
+      largeImage.style.display = 'block';
+ 
+      // Show the captured photo
+      // The inline CSS rules are used to resize the image
+      //
+      largeImage.src = imageURI;
+    }
+ 
+    // A button will call this function
+    //
+    function capturePhotoWithData() {
+      // Take picture using device camera and retrieve image as base64-encoded string
+      navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 50 });
+    }
+ 
+    function capturePhotoWithFile() {
+        navigator.camera.getPicture(onPhotoFileSuccess, onFail, { quality: 50, destinationType: Camera.DestinationType.FILE_URI });
+    }
+    
+    // A button will call this function
+    //
+    function getPhoto(source) {
+      // Retrieve image file location from specified source
+      navigator.camera.getPicture(onPhotoURISuccess, onFail, { quality: 50, 
+        destinationType: destinationType.FILE_URI,
+        sourceType: source });
+    }
+ 
+    // Called if something bad happens.
+    // 
+    function onFail(message) {
+      alert('Failed because: ' + message);
+    }
+
+    function onCapture() {
+
+    // Retrieve image file location from specified source
+    navigator.camera.getPicture(uploadPhoto,
+                                function(message) { alert('get picture failed'); },
+                                { quality: 50, 
+                                destinationType: navigator.camera.DestinationType.FILE_URI,
+                                sourceType : Camera.PictureSourceType.CAMERA,
+                                allowEdit : true,
+                                encodingType: Camera.EncodingType.JPEG,
+                                correctOrientation: true
+                            });
+
+    }
+
+    function onUpload() {
+
+    // Retrieve image file location from specified source
+    navigator.camera.getPicture(uploadPhoto,
+                                function(message) { alert('get picture failed'); },
+                                { quality: 50, 
+                                destinationType: navigator.camera.DestinationType.FILE_URI,
+                                sourceType: pictureSource.PHOTOLIBRARY
+                            });
+
+    }
+
+    function uploadPhoto(imageURI) {
+        var options = new FileUploadOptions();
+        options.fileKey="file";
+        options.fileName=imageURI.substr(imageURI.lastIndexOf('/')+1);
+        options.mimeType="image/jpeg";
+
+        var params = {};
+        params.current_user = currentUser['username'];
+        params.user_id = currentUser['user_id'];
+        params.post_name = $('#post_name').val();
+        params.post_description = $('#post_description').val();
+        params.post_category = $('#post_category').val();
+
+        options.params = params;
+        var ft = new FileTransfer();
+        ft.upload(imageURI, encodeURI("http://ec2-54-84-193-64.compute-1.amazonaws.com/www//upload/upload_file.php"), win, fail, options);
+        $.mobile.changePage("#home");                         
+
+
+
+    }
+
+    function win(r) {
+        alert("uploaded");
+        console.log("Code = " + r.responseCode);
+        console.log("Response = " + r.response);
+        console.log("Sent = " + r.bytesSent);
+    }
+
+    function fail(error) {
+        alert("An error has occurred: Code = " + error.code);
+        console.log("upload error source " + error.source);
+        console.log("upload error target " + error.target);
+    }
+    </script>
+  </head>
+
+
+  <body>
+
+<!-- ------------------------ Loading Page START -------------------------------------- -->
+
+<div data-role="page">
+    <img src="img/loadingscreen.png" style='width:100%;'>
+
+<script type="text/javascript">
+  setTimeout("location.href = '#login';",2000);
+</script>
+  </div>
+
+<!-- ------------------------ Loading Page END -------------------------------------- -->
+
+<!-- ------------------------ Login Page START -------------------------------------- -->
+
+<script type="text/javascript" charset="utf-8" src="my_script.js"></script>
+
+<div data-role="page" id="login" data-add-back-btn="false">
+
+<!-- HEADER -->
+<div data-role="header" data-position="fixed" data-id="foo1">
+  <div id="container">
+  <div id="header">
+    <h1><a href="#home">Login</a></h1>
+  </div>
+  </div>
+</div>
+<!-- /HEADER -->
+
+<!-- CONTENT -->
+<div data-role="content">
+
+  <!-- navbar -->
+  <div data-role="navbar">
+    <ul>
+    <li><a href="#login" class='ui-btn-active ui-state-persist'>Login</a></li>
+    <li><a href="#register">Register</a></li>
+    </ul></div>
+  <!-- /navbar -->
+<center>
+            <form id="check-user" class="ui-body ui-body-a ui-corner-all" data-ajax="false">
+                <fieldset>
+                    <div data-role="fieldcontain">
+                        <label for="username">Username:</label>
+                        <input type="text" value="" name="n" id="username_login"/>
+                    </div>                                  
+                    <div data-role="fieldcontain">                                      
+                        <label for="password">Password:</label>
+                        <input type="password" value="" name="p" id="password_login"/> 
+                    </div>
+                    <input type="button" data-theme="b" name="submit" id="submit_login" value="Login">
+                </fieldset>
+            </form>                               
+</center>
+ <!--   <form action="http://172.20.70.193/phploginsession/signup.php" method="post" data-ajax = "false">
+      Username:<input type="text" name="n"><br />
+      Password:<input type="password" name="p"><br />
+      id      :<input type="text" name="id"><br />
+      <input type="submit">
+    </form>-->
+<!--</html>-->
+<br>
+<!--<a href="#home"><img src="img/icon_facebook.png" width="10%"></a>
+
+<div class="fb-login-button" data-max-rows="1" data-size="medium" data-show-faces="false" data-auto-logout-link="false"></div>-->
+</center>
+</div></div>
+<!-- /CONTENT -->
+   
+  </div>
+
+<!-- ------------------------ Login Page END -------------------------------------- -->
+
+<!-- ------------------------ Register Page START -------------------------------------- -->
+
+<script type="text/javascript" charset="utf-8" src="my_script.js"></script>
+
+<div data-role="page" id="register" data-add-back-btn="false">
+
+<!-- HEADER -->
+<div data-role="header" data-position="fixed" data-id="foo1">
+  <div id="container">
+  <div id="header">
+    <h1><a href="#home">Register</a></h1>
+</div>
+</div>
+</div>
+<!-- /HEADER -->
+
+<!-- CONTENT -->
+<div data-role="content">
+
+  <!-- navbar -->
+  <div data-role="navbar">
+    <ul>
+    <li><a href="#login">Log in</a></li>
+    <li><a href="#register" class='ui-btn-active ui-state-persist'>Register</a></li>
+    </ul>
+  </div>
+    <!-- /navbar -->
+<center>
+            <form id="check-user" class="ui-body ui-body-a ui-corner-all" data-ajax="false">
+                <fieldset>
+                    <div data-role="fieldcontain">                                      
+                        <label for="email">Email-id:</label>
+                        <input type="text" value="" name="email" id="email_signup"/> 
+                    </div>
+                    <div data-role="fieldcontain">
+                        <label for="username">Username:</label>
+                        <input type="text" value="" name="n" id="username_signup"/>
+                    </div>                                  
+                    <div data-role="fieldcontain">                                      
+                        <label for="password">Password:</label>
+                        <input type="password" value="" name="p" id="password_signup"/> 
+                    </div>
+                    <div data-role="fieldcontain">                                      
+                        <label for="password">Confirm Password:</label>
+                        <input type="password" value="" name="c" id="confirmpassword_signup"/> 
+                    </div>
+                    <input type="button" data-theme="b" name="submit" id="submit_signup" value="Register">
+                </fieldset>
+            </form>                              
+        </div>
+ <!--   <form action="http://172.20.70.193/phploginsession/signup.php" method="post" data-ajax = "false">
+      Username:<input type="text" name="n"><br />
+      Password:<input type="password" name="p"><br />
+      id      :<input type="text" name="id"><br />
+      <input type="submit">
+    </form>-->
+<!--</html>-->
+<br>
+<!--<a href="#home"><img src="img/icon_facebook.png" width="10%"></a>
+<div class="fb-login-button" data-max-rows="1" data-size="medium" data-show-faces="false" data-auto-logout-link="false"></div>-->
+</center>
+
+</div>
+<!-- /CONTENT -->
+
+  </div>
+
+<!-- ------------------------ Register Page END -------------------------------------- -->
+
+<!-- ------------------------ Home Page START -------------------------------------- -->
+
+<div data-role="page" id="home" data-add-back-btn="false">
+<!-- HEADER -->
+<div data-role="header" data-position="fixed" data-id="foo1">
+  <div id="container">
+  <div id="header">
+    <h1><a href="#home">Liberum</a></h1>
+        <h7 id="sortedBy">Sorted by:</h7>
+</div>
+</div>
+    <a id="searchButton" href="#search" class="ui-btn ui-corner-all ui-icon-search ui-btn-icon-notext ui-btn-right">Search</a>
+</div>
+<!-- HEADER -->
+
+<!-- CONTENT -->
+<div data-role="content" id="homepage">
+  
+</div>
+
+<!-- CONTENT -->
+ <!-- BOTTOM BAR -->
+ <div data-role="footer" data-position="fixed" data-id="foo1">
+  <center>
+      <div data-role="navbar">
+        <ul>
+    <li><a href="#home" data-role="button" data-transition="slideup" class="navbutton"><img src="images/icons-png/home_icon.png"></a></li>
+
+    <li><a href="#liberum" data-role="button" data-transition="pop" class="navbutton"><img src="images/icons-png/camera-white.png"></a></li>
+    
+    <li><a href="#profile" data-role="button" data-transition="slide right" class="navbutton"><img src="images/icons-png/profile_icon.png"></a></li>
+  </ul>
+    </div> 
+        </center>  
+  </div>
+<!-- BOTTOM BAR -->    
+  </div>
+
+<!-- ------------------------ Home Page END -------------------------------------- -->
+
+<!-- ------------------------ Profile Page START -------------------------------------- -->
+
+<div data-role="page" id="profile" data-add-back-btn="false">
+  <!-- HEADER -->
+<div data-role="header" data-position="fixed" data-id="foo1">
+   <div id="container">
+  <div id="header">
+    <h1><a href="#">Profile</a></h1>
+</div>
+</div>
+<a id="settingsButton" href="#settings" class="ui-btn ui-corner-all ui-icon-gear ui-btn-icon-notext ui-btn-right">Settings</a></div>
+<!-- HEADER -->
+
+
+<!-- CONTENT -->
+<div data-role="content">
+    <div class="ui-body ui-body-a ui-corner-all">
+<div class="ui-grid-b">
+<div class="ui-block-a" id="current_user"><button type="button" data-mini="true">username</button></div>    
+</div>
+<br>
+<div data-role="navbar">
+  <ul>
+    <li><a href="#profile" data-icon="grid" data-iconpos="left" data-theme="b" data-mini="true">My Items</a></li>
+    <li><a href="#profile2" data-icon="check" data-iconpos="left" data-mini="true">Wanted Items</a></li>
+  </ul>
+</div><!-- /navbar -->
+<br>
+<!-- GRID VIEW -->
+<div class="gridlayout">
+<div class="ui-grid-b" id="profilegrid">
+    
+</div>
+</div>
+</div>
+  <!-- CONTENT -->
+
+
+<!-- BOTTOM BAR -->
+ <div data-role="footer" data-position="fixed" data-id="foo1">
+  <center>
+      <div data-role="navbar">
+        <ul>
+    <li><a href="#home" data-role="button" data-transition="slideup" class="navbutton"><img src="images/icons-png/home_icon.png"></a></li>
+
+    <li><a href="#liberum" data-role="button" data-transition="pop" class="navbutton"><img src="images/icons-png/camera-white.png"></a></li>
+    
+    <li><a href="#profile" data-role="button" data-transition="fade" class="navbutton"><img src="images/icons-png/profile_icon.png"></a></li>
+  </ul>
+        </center>  
+</div>
+  </div>
+<!-- BOTTOM BAR -->     
+  </div>
+
+<!-- ------------------------ Profile Page END -------------------------------------- -->
+
+<!-- ------------------------ Profile Page 2 START -------------------------------------- -->
+
+<div data-role="page" id="profile2" data-add-back-btn="false">
+  <!-- HEADER -->
+<div data-role="header" data-position="fixed" data-id="foo1">
+   <div id="container">
+  <div id="header">
+    <h1><a href="#">Profile</a></h1>
+</div>
+</div>
+<a id="settingsButton" href="#settings" class="ui-btn ui-corner-all ui-icon-gear ui-btn-icon-notext ui-btn-right">Settings</a></div>
+<!-- HEADER -->
+
+
+<!-- CONTENT -->
+<div data-role="content">
+    <div class="ui-body ui-body-a ui-corner-all">
+<div class="ui-grid-b">
+<div class="ui-block-a" id="current_user"><button type="button" data-mini="true">username</button></div>    
+</div>
+<br>
+<div data-role="navbar">
+  <ul>
+    <li><a href="#profile" data-icon="grid" data-iconpos="left" data-mini="true">My Items</a></li>
+    <li><a href="#profile2" data-icon="check" data-iconpos="bottom" data-theme="b" data-mini="true">Wanted Items</a></li>
+  </ul>
+</div><!-- /navbar -->
+<br>
+<!-- GRID VIEW -->
+<div class="gridlayout">
+<div class="ui-grid-b" id="wanteditems">
+    <div class="ui-block-a">
+  <img src="img/sampleimg.jpeg" alt=""></div>
+  <div class="ui-block-b">  
+  <img src="img/sampleimg.jpeg" alt=""></div>
+  <div class="ui-block-c"> 
+  <img src="img/sampleimg.jpeg" alt=""></div>
+
+    <div class="ui-block-a">
+</div>
+  <div class="ui-block-b">  
+</div>
+  <div class="ui-block-c">  
+</div>
+
+        <div class="ui-block-a">
+</div>
+  <div class="ui-block-b">  
+</div>
+  <div class="ui-block-c">  
+</div>
+
+</div>
+</div>
+</div>
+  <!-- CONTENT -->
+
+
+<!-- BOTTOM BAR -->
+ <div data-role="footer" data-position="fixed" data-id="foo1">
+  <center>
+      <div data-role="navbar">
+        <ul>
+    <li><a href="#home" data-role="button" data-transition="slideup" class="navbutton"><img src="images/icons-png/home_icon.png"></a></li>
+
+    <li><a href="#liberum" data-role="button" data-transition="pop" class="navbutton"><img src="images/icons-png/camera-white.png"></a></li>
+    
+    <li><a href="#profile" data-role="button" data-transition="fade" class="navbutton"><img src="images/icons-png/profile_icon.png"></a></li>
+  </ul>
+        </center>  
+</div>
+  </div>
+<!-- BOTTOM BAR -->     
+  </div>
+
+<!-- ------------------------ Profile Page 2 END -------------------------------------- -->
+
+<!-- ------------------------ Others Profile Page START -------------------------------------- -->
+
+<div data-role="page" id="others_profile" data-add-back-btn="false">
+  <!-- HEADER -->
+<div data-role="header" data-position="fixed" data-id="foo1">
+   <div id="container">
+  <div id="header">
+    <h1><a href="#">Profile</a></h1>
+</div>
+</div>
+</div>
+<!-- HEADER -->
+
+
+<!-- CONTENT -->
+<div data-role="content">
+    <div class="ui-body ui-body-a ui-corner-all">
+<div class="ui-grid-b">
+<div class="ui-block-a" id="other_user"><button type="button" data-mini="true">username</button></div>    
+</div>
+<br>
+<div data-role="navbar">
+  <ul>
+    <li><a href="#" data-icon="grid" data-iconpos="left" data-theme="b" data-mini="true">Items</a></li>
+  </ul>
+</div><!-- /navbar -->
+<br>
+<!-- GRID VIEW -->
+<div class="gridlayout">
+<div class="ui-grid-b" id="otherprofilegrid">
+    
+</div>
+</div>
+</div>
+  <!-- CONTENT -->
+
+
+<!-- BOTTOM BAR -->
+ <div data-role="footer" data-position="fixed" data-id="foo1">
+  <center>
+      <div data-role="navbar">
+        <ul>
+    <li><a href="#home" data-role="button" data-transition="slideup" class="navbutton"><img src="images/icons-png/home_icon.png"></a></li>
+
+    <li><a href="#liberum" data-role="button" data-transition="pop" class="navbutton"><img src="images/icons-png/camera-white.png"></a></li>
+    
+    <li><a href="#profile" data-role="button" data-transition="fade" class="navbutton"><img src="images/icons-png/profile_icon.png"></a></li>
+  </ul>
+        </center>  
+</div>
+  </div>
+<!-- BOTTOM BAR -->     
+  </div>
+
+<!-- ------------------------ Others Profile Page END -------------------------------------- -->
+
+<!-- ------------------------ Others Profile Page 2 START -------------------------------------- -->
+
+<div data-role="page" id="others_profile2" data-add-back-btn="false">
+  <!-- HEADER -->
+<div data-role="header" data-position="fixed" data-id="foo1">
+   <div id="container">
+  <div id="header">
+    <h1><a href="#">Profile</a></h1>
+</div>
+</div>
+<a id="settingsButton" href="#settings" class="ui-btn ui-corner-all ui-icon-gear ui-btn-icon-notext ui-btn-right">Settings</a></div>
+<!-- HEADER -->
+
+
+<!-- CONTENT -->
+<div data-role="content">
+    <div class="ui-body ui-body-a ui-corner-all">
+<div class="ui-grid-b">
+<div class="ui-block-a" id="other_user"><button type="button" data-mini="true">username</button></div>    
+</div>
+<br>
+<div data-role="navbar">
+  <ul>
+    <li><a href="#profile" data-icon="grid" data-iconpos="left" data-mini="true">Items</a></li>
+  </ul>
+</div><!-- /navbar -->
+<br>
+<!-- GRID VIEW -->
+<div class="gridlayout">
+<div class="ui-grid-b">
+    <div class="ui-block-a">
+  <img src="img/sampleimg.jpeg" alt=""></div>
+  <div class="ui-block-b">  
+  <img src="img/sampleimg.jpeg" alt=""></div>
+  <div class="ui-block-c"> 
+  <img src="img/sampleimg.jpeg" alt=""></div>
+
+    <div class="ui-block-a">
+</div>
+  <div class="ui-block-b">  
+</div>
+  <div class="ui-block-c">  
+</div>
+
+        <div class="ui-block-a">
+</div>
+  <div class="ui-block-b">  
+</div>
+  <div class="ui-block-c">  
+</div>
+
+</div>
+</div>
+</div>
+  <!-- CONTENT -->
+
+
+<!-- BOTTOM BAR -->
+ <div data-role="footer" data-position="fixed" data-id="foo1">
+  <center>
+      <div data-role="navbar">
+        <ul>
+    <li><a href="#home" data-role="button" data-transition="slideup" class="navbutton"><img src="images/icons-png/home_icon.png"></a></li>
+
+    <li><a href="#liberum" data-role="button" data-transition="pop" class="navbutton"><img src="images/icons-png/camera-white.png"></a></li>
+    
+    <li><a href="#profile" data-role="button" data-transition="fade" class="navbutton"><img src="images/icons-png/profile_icon.png"></a></li>
+  </ul>
+        </center>  
+</div>
+  </div>
+<!-- BOTTOM BAR -->     
+  </div>
+
+<!-- ------------------------ Others Profile Page 2 END -------------------------------------- -->
+
+
+<!-- ------------------------ Liberum Page START -------------------------------------- -->
+
+<div data-role="page" id="additem" data-add-back-btn="false">
+    <!-- HEADER -->
+<div data-role="header" data-position="fixed" data-id="foo1">
+  <div id="container">
+  <div id="header">
+    <h1><a href="#">Liberum</a></h1>
+</div>
+</div>
+</div>
+  <!-- HEADER -->
+
+
+
+<!-- CONTENT -->
+<div data-role="content">
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<center>
+  <h3>Please take a photo of the item you wish to display</h3>
+</center>
+<div class="ui-body ui-body-a ui-corner-all">
+
+    <div id="camera">
+    <button class="camera-control" onclick="onCapture();" data-mini="true">Capture Photo</button>
+    <div>
+      <img style="display:none;width:90%;" id="smallImage" src="" />
+      <img style="display:none;width:90%;" id="largeImage" src="" />
+    </div>
+</div>  
+    <a href="" onclick="getPhoto(pictureSource.PHOTOLIBRARY);" data-role="button" data-mini="true">Select From Photo Library</a>
+    </div>
+    <br>
+  <a href="#additem" data-role="button">Next</a>
+
+</div>
+<!-- CONTENT -->
+
+<!-- BOTTOM BAR -->
+ <div data-role="footer" data-position="fixed" data-id="foo1">
+  <center>
+      <div data-role="navbar">
+        <ul>
+    <li><a href="#home" data-role="button" data-transition="slideup" class="navbutton"><img src="images/icons-png/home_icon.png"></a></li>
+
+    <li><a href="#liberum" data-role="button" data-transition="pop" class="navbutton"><img src="images/icons-png/camera-white.png"></a></li>
+    
+    <li><a href="#profile" data-role="button" data-transition="slide right" class="navbutton"><img src="images/icons-png/profile_icon.png"></a></li>
+  </ul>
+        </center>  
+</div>
+  </div>
+<!-- BOTTOM BAR -->       
+  </div> 
+
+<!-- ------------------------ Liberum Page END -------------------------------------- -->
+
+<!-- ------------------------ Liberum Page 2 START -------------------------------------- -->
+
+<div data-role="page" id="liberum" data-add-back-btn="false">
+    <!-- HEADER -->
+<div data-role="header" data-position="fixed" data-id="foo1">
+  <div id="container">
+  <div id="header">
+    <h1><a href="#">Add Item</a></h1>
+</div>
+</div>
+</div>
+  <!-- HEADER -->
+
+
+<!-- CONTENT -->
+<div data-role="content">
+  <br>
+  <h4>Please fill the fields and then capture a photo</h4>
+  <br>
+<form id="check-user" class="ui-body ui-body-a ui-corner-all" data-ajax="false">
+<label for="basic">Name:</label>
+<input type="text" name="name" id="post_name" value="" placeholder="" data-mini="true"/>
+   <label for="select-category" class="select" data-overlay-theme="b">Category:</label>
+   <select name="select-category" id="post_category" data-mini="true">
+      <option value="appliance">Appliances</option>
+      <option value="sports">Sports</option>
+      <option value="electronics">Electronics</option>
+      <option value="furniture">Furniture</option>
+      <option value="other">Other</option>
+   </select>
+<label for="textarea">Description:</label>
+  <textarea name="textarea" id="post_description" placeholder=""  data-mini="true" ></textarea>
+
+<a href="#" data-role="button" data-transition="slideup" onclick="onCapture();" data-theme="b" id="post_submit">Capture Photo</a>
+</div>
+</form>
+<!-- CONTENT -->
+
+<!-- BOTTOM BAR -->
+ <div data-role="footer" data-position="fixed" data-id="foo1">
+  <center>
+      <div data-role="navbar">
+        <ul>
+    <li><a href="#home" data-role="button" data-transition="slideup" class="navbutton"><img src="images/icons-png/home_icon.png"></a></li>
+
+    <li><a href="#liberum" data-role="button" data-transition="pop" class="navbutton"><img src="images/icons-png/camera-white.png"></a></li>
+    
+    <li><a href="#profile" data-role="button" data-transition="slide right" class="navbutton"><img src="images/icons-png/profile_icon.png"></a></li>
+  </ul>
+        </center>  
+</div>
+  </div>
+<!-- BOTTOM BAR -->       
+  </div> 
+
+<!-- ------------------------ Liberum Page END -------------------------------------- -->
+
+<!-- ------------------------ Item Page START -------------------------------------- -->
+
+<div data-role="page" id="itempage" data-add-back-btn="false">
+    <!-- HEADER -->
+<div data-role="header" data-position="fixed" data-id="foo1">
+  <div id="container">
+  <div id="header">
+    <h1><a href="#">Item</a></h1>
+</div>
+</div>
+</div>
+  <!-- HEADER -->
+
+<!-- CONTENT -->
+<div data-role="content" id="userItem">
+     <center>
+      <div class="cropped"><div class="imgcropped" style="background-image: url(\'http://ec2-54-84-193-64.compute-1.amazonaws.com/www/upload/' + this.image_path + '\')"></div></div>
+     </center>
+
+     <a href="#basic" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Item Title</a>
+
+     <div class="ui-grid-a">
+     <div class="ui-block-a"><a href="mailto:' + this.email + '?subject=Liberum%20Item%20' + this.post_id + '&body=Hello ' + this.user +',%0D%0A I am interested in the item (' + this.name + ') you displayed on Liberum!%0D%0A%0D%0A' + currentUser['username'] + '" data-user_id="' + currentId + '" data-post_id="' + this.post_id + '" onclick="want(this);" data-role="button" data-icon="check" data-mini="true">Want</a></div>
+
+      <div class="ui-block-b">
+     <a href="#comment" id="comment" data-role="button" data-icon="arrow-r" data-iconpos="right" data-mini="true">Comment</a></div>
+     </div>
+     
+     <p id="description' + this.post_id + '"><b>Item Title:</b> ' + this.name + ' <br><b>Category:</b> ' + this.category +'<br><b>Description:</b><br><i>' + this.description + '</i><br></p>
+  
+     Posted By<br><p class="desc2" align="right"><a href="#" data-role="button" data-inline="false" data-user_id="' + this.user_id + '" data-username="' + this.user + '" onclick="otherUsers(this);" data-mini="true">' + this.user + '</a></p>
+     <hr color="D0D0D0">
+
+         <div class="ui-grid-a">
+    <div class="ui-block-a"><a href="#edit" data-role="button" data-mini"true">Edit</a></div>
+    <div class="ui-block-b"><a href="#delete" data-role="button" data-icon="delete" data-theme="b" data-mini"true">Delete</a></div>
+  </div>
+
+</div>
+
+<!-- CONTENT -->
+
+<!-- BOTTOM BAR -->
+ <div data-role="footer" data-position="fixed" data-id="foo1">
+  <center>
+      <div data-role="navbar">
+        <ul>
+    <li><a href="#home" data-role="button" data-transition="slideup" class="navbutton"><img src="images/icons-png/home_icon.png"></a></li>
+
+    <li><a href="#liberum" data-role="button" data-transition="pop" class="navbutton"><img src="images/icons-png/camera-white.png"></a></li>
+    
+    <li><a href="#profile" data-role="button" data-transition="slide right" class="navbutton"><img src="images/icons-png/profile_icon.png"></a></li>
+  </ul>
+        </center>  
+</div>
+  </div>
+<!-- BOTTOM BAR -->       
+  </div> 
+
+<!-- ------------------------ Item Page END -------------------------------------- -->
+
+<!-- ------------------------ Edit Item Page START -------------------------------------- -->
+
+<div data-role="page" id="edititem" data-add-back-btn="false">
+    <!-- HEADER -->
+<div data-role="header" data-position="fixed" data-id="foo1">
+  <div id="container">
+  <div id="header">
+    <h1><a href="#">Edit Item</a></h1>
+</div>
+</div>
+</div>
+  <!-- HEADER -->
+
+
+<!-- CONTENT -->
+<div data-role="content">
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+<form id="check-user" class="ui-body ui-body-a ui-corner-all" data-ajax="false">
+<label for="basic">Name:</label>
+<input type="text" name="name" id="editpost_name" value="" placeholder="" data-mini="true"/>
+   <label for="select-category" class="select" data-overlay-theme="b">Category:</label>
+   <select name="select-category" id="editpost_category" data-mini="true">
+      <option value="appliance">Appliances</option>
+      <option value="sports">Sports</option>
+      <option value="electronics">Electronics</option>
+      <option value="furniture">Furniture</option>
+      <option value="other">Other</option>
+   </select>
+<label for="textarea">Description:</label>
+  <textarea name="textarea" id="editpost_description" placeholder=""  data-mini="true" ></textarea>
+
+<a href="#" data-role="button" data-transition="slideup" data-theme="b" id="editpost_submit">Edit Item</a>
+</div>
+</form>
+<!-- CONTENT -->
+
+<!-- BOTTOM BAR -->
+ <div data-role="footer" data-position="fixed" data-id="foo1">
+  <center>
+      <div data-role="navbar">
+        <ul>
+    <li><a href="#home" data-role="button" data-transition="slideup" class="navbutton"><img src="images/icons-png/home_icon.png"></a></li>
+
+    <li><a href="#liberum" data-role="button" data-transition="pop" class="navbutton"><img src="images/icons-png/camera-white.png"></a></li>
+    
+    <li><a href="#profile" data-role="button" data-transition="slide right" class="navbutton"><img src="images/icons-png/profile_icon.png"></a></li>
+  </ul>
+        </center>  
+</div>
+  </div>
+<!-- BOTTOM BAR -->       
+  </div> 
+
+<!-- ------------------------ Edit Item Page END -------------------------------------- -->
+
+<!-- ------------------------ Settings Page START -------------------------------------- -->
+
+<div data-role="page" id="settings" data-add-back-btn="true">
+  <!-- HEADER -->
+<div data-role="header" data-position="fixed" data-id="foo1">
+   <div id="container">
+  <div id="header">
+    <h1><a href="#">Settings</a></h1>
+</div>
+</div>
+</div>
+<!-- HEADER -->
+
+
+<!-- CONTENT -->
+<div data-role="content">
+    
+  <form id="edit-user" class="ui-body ui-body-a ui-corner-all" data-ajax="false">
+      <label for="basic">Email Address:</label>
+      <input type="text" name="update_email" id="update_email" value="" placeholder="" data-mini="true"/>
+      <label for="basic">Current Password:</label>
+      <input type="password" name="update_currentpassword" id="update_currentpassword" value="" placeholder="" data-mini="true"/>
+      <label for="basic">New Password:</label>
+      <input type="password" name="update_newpassword" id="update_newpassword" value="" placeholder="" data-mini="true"/>
+      <label for="basic">Confirm New Password:</label>
+      <input type="password" name="update_confirmnewpassword" id="update_confirmnewpassword" value="" placeholder="" data-mini="true"/>
+<fieldset class="ui-grid-a">
+  <div class="ui-block-a"><a href="#profile" data-role="button">Cancel</a></div>
+  <div class="ui-block-b"><button type="button" data-theme="b" id="update_user">Save Changes</button></div>     
+  <a href="#login" id="delete_account" data-role="button" data-icon="delete">Delete Account</a>
+</fieldset>
+  </fieldset>
+
+  </form>
+<br>
+<br>
+<button href="#" type="button" data-theme="b" id="logout">Logout</button>
+
+
+</div>
+<!-- CONTENT -->
+
+<!-- BOTTOM BAR -->
+ <div data-role="footer" data-position="fixed" data-id="foo1">
+  <center>
+      <div data-role="navbar">
+        <ul>
+    <li><a href="#home" data-role="button" data-transition="slideup" class="navbutton"><img src="images/icons-png/home_icon.png"></a></li>
+
+    <li><a href="#liberum" data-role="button" data-transition="pop" class="navbutton"><img src="images/icons-png/camera-white.png"></a></li>
+    
+    <li><a href="#profile" data-role="button" data-transition="fade" class="navbutton"><img src="images/icons-png/profile_icon.png"></a></li>
+  </ul>
+        </center>  
+</div>
+  </div>
+<!-- BOTTOM BAR -->     
+  </div>
+
+<!-- ------------------------ Settings Page END -------------------------------------- -->
+
+<!-- ------------------------ Comment Page START -------------------------------------- -->
+
+<div data-role="page" id="comment" data-add-back-btn="true">
+
+<!-- HEADER -->
+<div data-role="header" data-position="fixed" data-id="foo1">
+  <div id="container">
+  <div id="header">
+    <h1><a href="#comment">Comment</a></h1>
+</div>
+</div>
+</div>
+<!-- HEADER -->
+
+
+<!-- CONTENT -->
+<div data-role="content">
+<div id="comments">
+  <a href="#" data-role="button" data-icon="check" data-inline="true" data-mini="true">user1</a>
+  <p>blah blah blah</p>
+  <hr>
+  <a href="#" data-role="button" data-icon="check" data-inline="true" data-mini="true">user2</a>
+  <p>blah blah blah</p>  
+  <hr>
+  <a href="#" data-role="button" data-icon="check" data-inline="true" data-mini="true">user1</a>
+  <p>blah blah blah</p>
+  <hr>
+  <a href="#" data-role="button" data-icon="check" data-inline="true" data-mini="true">user2</a>
+  <p>blah blah blah</p>  
+  <hr>
+</div>
+
+  
+</div>
+<!-- CONTENT -->
+
+<!-- BOTTOM BAR -->
+ <div data-role="footer" data-position="fixed" data-id="foo1">
+<div id="commentbar" data-position="fixed">
+
+    <label for="textarea-a"><strong> Comment:</strong></label>
+    <textarea name="textarea" id="comment_text"></textarea>
+    <div id="comment_button" class="ui-block-b"><button type="submit" data-theme="b">Submit</button></div> 
+</div>
+ 
+  <center>
+      <div data-role="navbar">
+        <ul>
+    <li><a href="#home" data-role="button" data-transition="slideup" class="navbutton"><img src="images/icons-png/home_icon.png"></a></li>
+
+    <li><a href="#liberum" data-role="button" data-transition="pop" class="navbutton"><img src="images/icons-png/camera-white.png"></a></li>
+    
+    <li><a href="#profile" data-role="button" data-transition="fade" class="navbutton"><img src="images/icons-png/profile_icon.png"></a></li>
+  </ul>
+        </center>  
+</div>
+  </div>
+<!-- BOTTOM BAR --> 
+
+</div>
+<!-- ------------------------ Comment Page END -------------------------------------- -->
+
+
+<!-- ------------------------ Search Page START -------------------------------------- -->
+
+<div data-role="page" id="search" data-add-back-btn="true">
+
+<!-- HEADER -->
+<div data-role="header" data-position="fixed" data-id="foo1">
+  <div id="container">
+  <div id="header">
+    <h1><a href="#comment">Sort</a></h1>
+</div>
+</div>
+</div>
+<!-- HEADER -->
+
+
+<!-- CONTENT -->
+<div data-role="content">
+
+<form id="category_select" class="ui-body ui-body-a ui-corner-all" data-ajax="false">
+<label for="select-choice-0" class="select">Select Category</label>
+<select name="select-choice-0" id="category_form">
+   <option value="all">All</option>
+   <option value="appliance">Appliance</option>
+   <option value="sports">Sports</option>
+   <option value="electronics">Electronics</option>
+   <option value="furniture">Furniture</option>
+   <option value="other">Other</option>
+</select>
+<br>
+<a href="#" id="category_select_submit" data-theme="b" data-role="button">Sort</a>
+
+</form>
+
+</div>
+<!-- CONTENT -->
+
+<!-- BOTTOM BAR -->
+ <div data-role="footer" data-position="fixed" data-id="foo1">
+  <center>
+      <div data-role="navbar">
+        <ul>
+    <li><a href="#home" data-role="button" data-transition="slideup" class="navbutton"><img src="images/icons-png/home_icon.png"></a></li>
+
+    <li><a href="#liberum" data-role="button" data-transition="pop" class="navbutton"><img src="images/icons-png/camera-white.png"></a></li>
+    
+    <li><a href="#profile" data-role="button" data-transition="fade" class="navbutton"><img src="images/icons-png/profile_icon.png"></a></li>
+  </ul>
+        </center>  
+</div>
+  </div>
+<!-- BOTTOM BAR --> 
+
+</div>
+<!-- ------------------------ Search Page END -------------------------------------- -->
+
+<!-- ------------------------ Image Page START -------------------------------------- -->
+
+<div data-role="page" id="image" data-add-back-btn="true" style="background-color: black" >
+
+
+<div data-role="content" id="picture">
+</div>
+
+
+</div>
+
+
+<!-- ------------------------ Image Page END -------------------------------------- -->
+
+
+
+</html>
+<!-- old navigation bar
+    <div data-role="footer" data-position="fixed" data-id="foo1">  <center>
+    <div data-role="controlgroup" data-type="horizontal">
+    <a href="#home" data-role="button" data-icon="lib-home">Home</a>
+    <a href="#liberum" data-role="button" data-icon="lib-photo">Liberum</a>
+    <a href="#profile" data-role="button" data-icon="lib-profile">Profile</a>
+    </div> 
+    </center>  
+    </div>
+--> 
+
+<!-- old nav bar with icons
+    <div data-role="footer" data-position="fixed" >
+    <center>
+    <a href="#home">
+    <img width = "30%" src="img/button_home.png" id="home"/></a>
+
+    <a href="#liberum">
+    <img width = "30%" src="img/button_liberum.png" id="liberum"/></a>
+    
+    <a href="#profile">
+    <img width = "30%" src="img/button_profile.png" id="profile"/></a>
+    </center>   
+    </div> 
+-->
+<!-- old top bar
+    <div class = "topbar">
+      <img width = "100%" src="img/topbar.png" alt="some_text">
+      <img width = "15%" src="img/button_search.png" alt="some_text">
+    </div>
+    </head>
+-->
+
+<!-- FOR REFERENCE -->
+  <!-- <onclick="capturePhoto()"/> -->
+    <!-- <button onclick="capturePhotoEdit();">Capture Editable Photo</button> -->
+<!-- <<button onclick="getPhoto(pictureSource.PHOTOLIBRARY);">From Photo Library</button> -->
+  <!-- <<button onclick="getPhoto(pictureSource.SAVEDPHOTOALBUM);">From Photo Album</button> 
+-->
+
+
+  </body>
+</html>

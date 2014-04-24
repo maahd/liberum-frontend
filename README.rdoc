@@ -1,0 +1,13 @@
+== 67-373 Junior Project
+
+Liberum is a mobile application that connects people who want to give away things with people who need those things. The backend was written in PHP and MySQL while the front end was written in HTML and CSS. We used JQuery and AJAX to aid with client server communication as this was required for phonegap. Phonegap allows you to write markup and converts to native Java or Objective-C. 
+
+== Members & Roles
+
+Maahd Shahzad, Technical Lead
+
+Noor-ul-Huda Admaney, Product Owner
+
+Ahmed Hashmi, SCRUM Master
+
+Rawan Al-Marri, Design Lead

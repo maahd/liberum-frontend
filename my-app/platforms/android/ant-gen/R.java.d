@@ -1,0 +1,24 @@
+/Users/islab-1602/my-app/platforms/android/ant-gen/com/phonegap/helloworld/R.java \
+ : /Users/islab-1602/my-app/platforms/android/res/drawable/icon.png \
+/Users/islab-1602/my-app/platforms/android/res/drawable/icon2.png \
+/Users/islab-1602/my-app/platforms/android/res/drawable-hdpi/icon.png \
+/Users/islab-1602/my-app/platforms/android/res/drawable-hdpi/icon2.png \
+/Users/islab-1602/my-app/platforms/android/res/drawable-ldpi/icon.png \
+/Users/islab-1602/my-app/platforms/android/res/drawable-ldpi/icon2.png \
+/Users/islab-1602/my-app/platforms/android/res/drawable-mdpi/icon.png \
+/Users/islab-1602/my-app/platforms/android/res/drawable-mdpi/icon2.png \
+/Users/islab-1602/my-app/platforms/android/res/drawable-xhdpi/icon.png \
+/Users/islab-1602/my-app/platforms/android/res/drawable-xhdpi/icon2.png \
+/Users/islab-1602/my-app/platforms/android/res/values/strings.xml \
+/Users/islab-1602/my-app/platforms/android/res/xml/config.xml \
+/Users/islab-1602/my-app/platforms/android/ant-build/res/drawable/icon.png \
+/Users/islab-1602/my-app/platforms/android/ant-build/res/drawable/icon2.png \
+/Users/islab-1602/my-app/platforms/android/ant-build/res/drawable-hdpi/icon.png \
+/Users/islab-1602/my-app/platforms/android/ant-build/res/drawable-hdpi/icon2.png \
+/Users/islab-1602/my-app/platforms/android/ant-build/res/drawable-ldpi/icon.png \
+/Users/islab-1602/my-app/platforms/android/ant-build/res/drawable-ldpi/icon2.png \
+/Users/islab-1602/my-app/platforms/android/ant-build/res/drawable-mdpi/icon.png \
+/Users/islab-1602/my-app/platforms/android/ant-build/res/drawable-mdpi/icon2.png \
+/Users/islab-1602/my-app/platforms/android/ant-build/res/drawable-xhdpi/icon.png \
+/Users/islab-1602/my-app/platforms/android/ant-build/res/drawable-xhdpi/icon2.png \
+/Users/islab-1602/my-app/platforms/android/ant-build/AndroidManifest.xml \
